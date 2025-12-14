@@ -75,19 +75,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-950 relative w-full">
       {/* Header with Avatar */}
-      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-gray-900 via-gray-900/80 to-transparent z-10 flex items-center px-4 md:px-6 pointer-events-none">
+      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-gray-900 via-gray-900/80 to-transparent z-30 flex items-center px-4 md:px-6 pointer-events-none">
         <div className="flex items-center gap-3 md:gap-4 pointer-events-auto w-full">
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={onToggleSidebar}
-            className="md:hidden p-2 -ml-2 text-gray-400 hover:text-white transition-colors rounded-lg active:bg-gray-800"
-            aria-label="Open Memory Panel"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+
+
+          {/* Mobile Menu Button Removed (Using Swipe) */}
 
           <div className="relative group cursor-pointer flex-shrink-0">
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 p-[2px] shadow-[0_0_15px_rgba(219,39,119,0.5)] transition-shadow duration-300 group-hover:shadow-[0_0_25px_rgba(219,39,119,0.7)]">

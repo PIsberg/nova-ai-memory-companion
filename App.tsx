@@ -267,34 +267,80 @@ export default function App() {
     reader.readAsText(file);
   };
 
+  // --- Swipe Gesture Logic ---
+  const [touchStart, setTouchStart] = useState<{ x: number, y: number } | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+
+    const diffX = touchEndX - touchStart.x;
+    const diffY = touchEndY - touchStart.y;
+
+    // Determine if swipe is mostly horizontal
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      // Swipe Right (Open Sidebar) - Only if starting from left edge (first 50px)
+      if (diffX > 50 && touchStart.x < 50 && !isSidebarOpen) {
+        setIsSidebarOpen(true);
+      }
+      // Swipe Left (Close Sidebar) - Only if sidebar is open
+      else if (diffX < -50 && isSidebarOpen) {
+        setIsSidebarOpen(false);
+      }
+    }
+
+    setTouchStart(null);
+  };
+
   return (
     <div
       className="flex h-screen w-screen bg-gray-950 text-gray-100 overflow-hidden font-sans flex-col fixed inset-0"
       style={{ backgroundColor: '#0f172a', width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
 
 
-      {/* Mobile Backdrop */}
+      {/* Mobile Sidebar Overlay (Simple & Safe) */}
       {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm transition-opacity"
-          onClick={() => setIsSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+
+          {/* Sidebar Content */}
+          <div className="relative w-4/5 max-w-xs bg-gray-900 h-full shadow-2xl flex flex-col border-r border-gray-800">
+            <MemoryPanel
+              memories={memories}
+              processingFact={processingFact}
+              lastExtractedFact={lastExtractedFact}
+              onExport={handleExportData}
+              onImport={handleImportData}
+              onClose={() => setIsSidebarOpen(false)}
+            />
+          </div>
+        </div>
       )}
 
-      {/* Sidebar Container - Responsive */}
-      <div className={`
-        fixed inset-y-0 left-0 z-40 h-full w-80 transform transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:relative md:translate-x-0 md:block
-      `}>
+      {/* Desktop Sidebar (Hidden on Mobile) */}
+      <div className="hidden md:block w-80 relative z-30 h-full border-r border-gray-800">
         <MemoryPanel
           memories={memories}
           processingFact={processingFact}
           lastExtractedFact={lastExtractedFact}
           onExport={handleExportData}
           onImport={handleImportData}
-          onClose={() => setIsSidebarOpen(false)}
         />
       </div>
 
