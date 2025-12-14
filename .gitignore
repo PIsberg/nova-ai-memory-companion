@@ -145,3 +145,16 @@ dist
 *.njsproj
 *.sln
 *.sw?
+
+# Capacitor
+# https://capacitorjs.com/docs/basics/workflow#git
+/android/app/build/
+/android/.gradle/
+/android/local.properties
+/android/*.iml
+/android/.idea/
+/android/captures/
+/android/app/src/main/assets/public/
+/ios/App/App/public/
+/ios/App/Podfile.lock
+/ios/DerivedData/
