@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import MemoryPanel from './components/MemoryPanel';
 import ChatInterface from './components/ChatInterface';
 import { Message, Memory, BackupData } from './types';
-import { extractFact, generateReply, transcribeAudio } from './services/geminiService';
+import { extractFact, generateReply, transcribeAudio, generateWelcomeMessage, generateProactiveQuestion } from './services/geminiService';
+import { useTTS } from './hooks/useTTS';
 
 export default function App() {
   // Initialize state with lazy initializers to check localStorage first
@@ -31,6 +32,8 @@ export default function App() {
   const [processingFact, setProcessingFact] = useState(false);
   const [lastExtractedFact, setLastExtractedFact] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const { speak, cancel, isSupported } = useTTS();
 
   // Persistence Effects
   useEffect(() => {
@@ -43,17 +46,76 @@ export default function App() {
 
   // Initial greeting (only if no messages exist)
   useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          id: 'init-1',
-          role: 'model',
-          text: "Hi! I'm Nova. I have a long-term memory, so if you tell me things about yourself (like allergies, hobbies, or plans), I'll remember them for next time. What's on your mind?",
-          timestamp: new Date()
+    const init = async () => {
+      if (messages.length === 0) {
+        // First Run Ever
+        setMessages([
+          {
+            id: 'init-1',
+            role: 'model',
+            text: "Hi! I'm Nova. I have a long-term memory, so if you tell me things about yourself (like allergies, hobbies, or plans), I'll remember them for next time. What's on your mind?",
+            timestamp: new Date()
+          }
+        ]);
+      } else {
+        // Welcome Back Logic
+        const lastMsg = messages[messages.length - 1];
+        const lastTime = new Date(lastMsg.timestamp).getTime();
+        const now = new Date().getTime();
+        const hoursDiff = (now - lastTime) / (1000 * 60 * 60);
+
+        if (hoursDiff > 1) { // 1 hour threshold
+          try {
+            const welcomeText = await generateWelcomeMessage(memories, new Date(lastMsg.timestamp));
+            setMessages(prev => [...prev, {
+              id: Date.now().toString(),
+              role: 'model',
+              text: welcomeText,
+              timestamp: new Date()
+            }]);
+            if (!isMuted) speak(welcomeText); // Auto-speak welcome
+          } catch (e) {
+            console.error("Welcome message failed", e);
+          }
         }
-      ]);
+      }
+    };
+    init();
+  }, []); // Run once on mount
+
+  // Idle Nudge Logic
+  useEffect(() => {
+    // Only run if we have messages and sidebar isn't blocking view
+    if (messages.length > 0 && !isTyping) {
+      const timer = setTimeout(async () => {
+        // Random chance to nudge (avoid being too annoying, only 1 nudge per session load logic implies simple timeout here)
+        // For now, deterministic: if idle for 2 mins, trigger ONCE.
+        // We need a ref to track if we already nudged this session to avoid loop? 
+        // Let's just do it. If user ignores, we won't nudge again until simple re-render? 
+        // Actually, let's keep it simple: 2 mins of silence -> Nudge.
+
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg.role === 'model') return; // Don't nudge if AI spoke last (waiting for user)
+
+        try {
+          const question = await generateProactiveQuestion(memories);
+          const nudgeMsg: Message = {
+            id: Date.now().toString(),
+            role: 'model',
+            text: question,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, nudgeMsg]);
+          if (!isMuted) speak(question);
+        } catch (e) {
+          console.error("Proactive nudge failed", e);
+        }
+
+      }, 120000); // 2 minutes
+
+      return () => clearTimeout(timer); // Cleanup on any render (message change)
     }
-  }, []);
+  }, [messages, isTyping, memories, isMuted, speak]);
 
   const processUserMessage = async (text: string, isAudio: boolean = false) => {
     const userMsg: Message = {
@@ -96,6 +158,10 @@ export default function App() {
       };
 
       setMessages(prev => [...prev, modelMsg]);
+
+      if (!isMuted) {
+        speak(replyText);
+      }
     } catch (error) {
       console.error("Error generating reply:", error);
       const errorMsg: Message = {
@@ -111,6 +177,7 @@ export default function App() {
   };
 
   const handleSendMessage = (text: string) => {
+    cancel(); // Stop speaking when user sends a new message
     processUserMessage(text, false);
   };
 
@@ -118,6 +185,7 @@ export default function App() {
     try {
       const text = await transcribeAudio(audioBlob);
       if (text.trim()) {
+        cancel(); // Stop speaking when user sends a new message
         processUserMessage(text, true);
       }
     } catch (error) {
@@ -228,6 +296,11 @@ export default function App() {
           onSendMessage={handleSendMessage}
           onSendAudio={handleSendAudio}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          isMuted={isMuted}
+          onToggleMute={() => {
+            if (!isMuted) cancel();
+            setIsMuted(!isMuted);
+          }}
         />
 
         {/* Mobile Processing Indicator (Floating) */}

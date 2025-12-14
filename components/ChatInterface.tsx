@@ -8,14 +8,18 @@ interface ChatInterfaceProps {
   onSendMessage: (text: string) => void;
   onSendAudio: (audio: Blob) => void;
   onToggleSidebar: () => void;
+  isMuted: boolean;
+  onToggleMute: () => void;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
-  messages, 
-  isTyping, 
-  onSendMessage, 
+const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  messages,
+  isTyping,
+  onSendMessage,
   onSendAudio,
-  onToggleSidebar
+  onToggleSidebar,
+  isMuted,
+  onToggleMute
 }) => {
   const [inputText, setInputText] = React.useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -52,9 +56,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Header with Avatar */}
       <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-gray-900 via-gray-900/80 to-transparent z-10 flex items-center px-4 md:px-6 pointer-events-none">
         <div className="flex items-center gap-3 md:gap-4 pointer-events-auto w-full">
-          
+
           {/* Mobile Menu Button */}
-          <button 
+          <button
             onClick={onToggleSidebar}
             className="md:hidden p-2 -ml-2 text-gray-400 hover:text-white transition-colors rounded-lg active:bg-gray-800"
             aria-label="Open Memory Panel"
@@ -67,9 +71,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <div className="relative group cursor-pointer flex-shrink-0">
             <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 p-[2px] shadow-[0_0_15px_rgba(219,39,119,0.5)] transition-shadow duration-300 group-hover:shadow-[0_0_25px_rgba(219,39,119,0.7)]">
               <div className="h-full w-full rounded-full overflow-hidden border-2 border-gray-900 bg-gray-800">
-                <img 
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Nova&backgroundColor=b6e3f4" 
-                  alt="Nova" 
+                <img
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Nova&backgroundColor=b6e3f4"
+                  alt="Nova"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -83,32 +87,49 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               Memory Active
             </p>
           </div>
+
+          <button
+            onClick={onToggleMute}
+            className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg active:bg-gray-800"
+            title={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-4 pt-24 pb-4 space-y-6 scroll-smooth">
         {messages.length === 0 && (
-           <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-60">
-             <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-             </div>
-             <p className="text-sm font-medium">Say "I'm allergic to peanuts" to test my memory.</p>
-           </div>
+          <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-60">
+            <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium">Say "I'm allergic to peanuts" to test my memory.</p>
+          </div>
         )}
-        
+
         {messages.map((msg) => (
-          <div 
-            key={msg.id} 
+          <div
+            key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div 
+            <div
               className={`
                 max-w-[85%] sm:max-w-[75%] rounded-2xl px-5 py-3 shadow-lg backdrop-blur-sm
-                ${msg.role === 'user' 
-                  ? 'bg-gradient-to-br from-brand-600 to-brand-700 text-white rounded-tr-sm' 
+                ${msg.role === 'user'
+                  ? 'bg-gradient-to-br from-brand-600 to-brand-700 text-white rounded-tr-sm'
                   : 'bg-gray-800 text-gray-100 rounded-tl-sm border border-gray-700'
                 }
               `}
@@ -126,11 +147,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
         {isTyping && (
           <div className="flex justify-start animate-fade-in-up">
-             <div className="bg-gray-800 rounded-2xl rounded-tl-none px-5 py-4 shadow-lg border border-gray-700 flex gap-1.5 items-center">
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-[bounce_1s_infinite_0ms]"></span>
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-[bounce_1s_infinite_200ms]"></span>
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-[bounce_1s_infinite_400ms]"></span>
-             </div>
+            <div className="bg-gray-800 rounded-2xl rounded-tl-none px-5 py-4 shadow-lg border border-gray-700 flex gap-1.5 items-center">
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-[bounce_1s_infinite_0ms]"></span>
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-[bounce_1s_infinite_200ms]"></span>
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-[bounce_1s_infinite_400ms]"></span>
+            </div>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -166,15 +187,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="flex items-center gap-3 max-w-4xl mx-auto">
-          
+
           <button
             type="button"
             onClick={handleMicClick}
             className={`
               p-3 rounded-full transition-all duration-200 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-red-500
-              ${status === RecorderStatus.Recording 
-                ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30 animate-pulse ring-2 ring-red-500/50' 
-                : permissionError 
+              ${status === RecorderStatus.Recording
+                ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30 animate-pulse ring-2 ring-red-500/50'
+                : permissionError
                   ? 'bg-gray-800 text-red-400 hover:bg-gray-700'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
               }
@@ -182,9 +203,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             title={status === RecorderStatus.Recording ? "Stop Recording" : "Start Recording"}
           >
             {status === RecorderStatus.Recording ? (
-               <div className="h-6 w-6 flex items-center justify-center">
-                 <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
-               </div>
+              <div className="h-6 w-6 flex items-center justify-center">
+                <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
+              </div>
             ) : (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />

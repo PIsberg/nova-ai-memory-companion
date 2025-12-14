@@ -51,6 +51,29 @@ Once text is available, `App.tsx` initiates two asynchronous operations simultan
     3.  **Output**: A JSON object `{ hasFact: boolean, fact: string }`.
     4.  If `hasFact` is true, the new fact is added to the Memory Store and the UI shows a "Memory Updated" notification.
 
+### Step 3: Data Import & Export
+The application supports manual backup and restoration of the "Brain" (Memories + Chat History).
+
+*   **Data Structure**:
+    The backup is a JSON object containing:
+    *   `version`: Number (schema version)
+    *   `exportedAt`: ISO Date string
+    *   `memories`: Array of Memory objects
+    *   `messages`: Array of Message objects
+
+*   **Export Process**:
+    1.  User clicks "Export".
+    2.  App serializes the current `memories` and `messages` state to a JSON blob.
+    3.  A client-side download is triggered for a file named `nova-memory-[date].json`.
+
+*   **Import Process**:
+    1.  User selects a `.json` file via the hidden file input.
+    2.  `FileReader` reads the text content.
+    3.  App parses the JSON and "revives" date strings back into Date objects.
+    4.  **Validation**: Checks for existence of `memories` and `messages` arrays.
+    5.  **Confirmation**: Asks user to confirm overwriting current data.
+    6.  **Hydration**: Replaces React state with the imported data.
+
 ## 4. Sequence Diagram
 
 The following diagram illustrates the lifecycle of a single message:

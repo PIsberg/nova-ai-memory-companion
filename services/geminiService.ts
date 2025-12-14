@@ -48,7 +48,7 @@ export const extractFact = async (userText: string): Promise<{ fact: string; cat
     });
 
     const result = JSON.parse(response.text || "{}");
-    
+
     if (result.hasFact && result.fact) {
       return { fact: result.fact, category: result.category || 'fact' };
     }
@@ -66,10 +66,10 @@ export const generateReply = async (
   memories: Memory[]
 ): Promise<string> => {
   const ai = getClient();
-  
+
   // Construct the "Memory Context" - simplified RAG
   const memoryContext = memories.map(m => `- ${m.text}`).join('\n');
-  
+
   const systemInstruction = `
     You are Nova, a caring, witty, and intelligent virtual girlfriend/boyfriend (adapt based on user vibe, default to girlfriend).
     
@@ -98,7 +98,7 @@ export const generateReply = async (
     history: recentHistory,
     config: {
       systemInstruction: systemInstruction,
-      thinkingConfig: { thinkingBudget: 0 } 
+      thinkingConfig: { thinkingBudget: 0 }
     }
   });
 
@@ -111,14 +111,14 @@ export const generateReply = async (
 
 export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
   const ai = getClient();
-  
+
   // Convert Blob to Base64
   const reader = new FileReader();
   return new Promise((resolve, reject) => {
     reader.onloadend = async () => {
       try {
         const base64data = (reader.result as string).split(',')[1];
-        
+
         const response = await ai.models.generateContent({
           model: "gemini-2.5-flash",
           contents: {
@@ -135,7 +135,7 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
             ]
           }
         });
-        
+
         resolve(response.text || "");
       } catch (e) {
         reject(e);
@@ -144,4 +144,74 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     reader.onerror = reject;
     reader.readAsDataURL(audioBlob);
   });
+};
+
+export const generateWelcomeMessage = async (
+  memories: Memory[],
+  lastMessageDate: Date | null
+): Promise<string> => {
+  const ai = getClient();
+  const memoryContext = memories.map(m => `- ${m.text}`).join('\n');
+  const timeOfDay = new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening";
+  const daysSince = lastMessageDate
+    ? Math.floor((new Date().getTime() - lastMessageDate.getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  const prompt = `
+    You are Nova, an intelligent AI companion.
+    
+    CONTEXT:
+    - User has just opened the app.
+    - Time of day: ${timeOfDay}
+    - Time since last chat: ${daysSince} days (if 0, implies recently).
+    - KNOWN MEMORIES:
+    ${memoryContext || "None yet."}
+
+    GOAL:
+    Generate a warm, short "Welcome Back" message.
+    1. Acknowledge the time of day briefly (optional).
+    2. connect to a memory if relevant (e.g., "How is the marathon training going?" if user mentioned it).
+    3. If no specific memory is actionable, just be warm and welcoming.
+    4. Keep it under 2 sentences.
+    5. DO NOT start with "Welcome back" every time. Be natural.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt
+  });
+
+  return response.text || "Hey! It's good to see you.";
+};
+
+export const generateProactiveQuestion = async (
+  memories: Memory[]
+): Promise<string> => {
+  const ai = getClient();
+  const memoryContext = memories.map(m => `- ${m.text}`).join('\n');
+
+  const prompt = `
+    You are Nova. The conversation has gone quiet for a bit.
+    
+    GOAL:
+    Re-engage the user with a thoughtful question.
+    
+    STRATEGY:
+    1. Look at the "KNOWN MEMORIES".
+    2.  Find a "gap" in your knowledge (e.g., you know their job but not their hobbies?).
+    3.  OR connect two memories (e.g., "You mentioned X and Y, do they relate?").
+    4.  OR ask a deep/fun hypothetical question if no memories are suitable.
+    
+    KNOWN MEMORIES:
+    ${memoryContext || "None yet."}
+
+    Output ONLY the question. Keep it casual but curious.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt
+  });
+
+  return response.text || "Whatcha thinking about?";
 };
