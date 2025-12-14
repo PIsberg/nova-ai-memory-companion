@@ -162,5 +162,17 @@ dist
 # Release Keystore
 *.keystore
 *.jks
+/release.keystore
 /android/app/release/
 /android/app/*.keystore
+
+# Kotlin / Compiles
+.kotlin_module
+*.class
+*.jar
+*.aar
+
+# IDE checks
+.idea/
+*.iml
+*.swp
