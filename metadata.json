@@ -1,0 +1,7 @@
+{
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "name": "Nova - Memory AI Companion",
+  "description": ""
+}
