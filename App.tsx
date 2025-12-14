@@ -167,7 +167,7 @@ export default function App() {
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        text: "I'm having a little trouble connecting to my brain right now. Can you say that again?",
+        text: `I'm having a little trouble connecting to my brain right now. Can you say that again? (Error: ${(error as Error).message})`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -236,6 +236,10 @@ export default function App() {
 
         if (!backup.memories || !backup.messages) {
           throw new Error("Invalid backup file format: missing memories or messages");
+        }
+
+        if (backup.version !== 1) {
+          throw new Error(`Unsupported backup version: ${backup.version || 'unknown'}`);
         }
 
         // Use a timeout to ensure UI renders before alert/confirm blocks (rare issue but possible)

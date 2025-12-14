@@ -29,15 +29,27 @@ Nova is a React-based AI companion that **remembers you**. Unlike standard chatb
 
 1.  **Clone the repo**
 2.  **Install dependencies**:
+    > ⚠️ **Note**: This project requires **Node.js 20+** due to `@google/genai` dependencies.
     ```bash
     npm install
     ```
 3.  **Configure API Key**:
+    -   Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
     -   Create a `.env.local` file.
     -   Add your Google Gemini API key: `GEMINI_API_KEY=your_key_here`
 4.  **Run Locally**:
     ```bash
     npm run dev
+    ```
+5.  **Build for Production**:
+    ```bash
+    npm run build
+    ```
+    (Creates a `dist/` folder with your optimized app).
+
+6.  **Preview Production Build**:
+    ```bash
+    npm run preview
     ```
 
 ## 🛠️ Architecture
