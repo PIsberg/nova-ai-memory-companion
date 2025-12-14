@@ -158,3 +158,9 @@ dist
 /ios/App/App/public/
 /ios/App/Podfile.lock
 /ios/DerivedData/
+
+# Release Keystore
+*.keystore
+*.jks
+/android/app/release/
+/android/app/*.keystore
