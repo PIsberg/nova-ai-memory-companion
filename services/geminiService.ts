@@ -3,8 +3,14 @@ import { Message, Memory } from "../types";
 
 // Helper to get API key (simulated environment access)
 const getClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API Key not found in environment");
+  // Use import.meta.env for Vite which is replaced at build time
+  // @ts-ignore
+  const apiKey = import.meta.env.GEMINI_API_KEY;
+
+  if (!apiKey || apiKey === "undefined") {
+    console.error("API Key missing. Check .env.local or build configuration.");
+    throw new Error("API Key not found in environment");
+  }
   return new GoogleGenAI({ apiKey });
 };
 

@@ -52,6 +52,20 @@ Nova is a React-based AI companion that **remembers you**. Unlike standard chatb
     npm run preview
     ```
 
+7.  **Run as Android App**:
+    Detailed instructions for building the Android application (requires Android Studio):
+    ```bash
+    # 1. Build web assets
+    npm run build
+
+    # 2. Sync with Capacitor
+    npx cap sync
+
+    # 3. Open in Android Studio
+    npx cap open android
+    ```
+    (Then click the "Run" button in Android Studio to launch on a Simulator or Device).
+
 ## 🛠️ Architecture
 Built with **React 19**, **TypeScript**, **Tailwind CSS**, and **Google Gemini 2.5 Flash**.
 See [architecture.md](architecture.md) for a deep dive into the dual-thread RAG implementation.

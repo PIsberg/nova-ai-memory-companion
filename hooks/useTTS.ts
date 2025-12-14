@@ -6,17 +6,24 @@ export const useTTS = () => {
   const synth = useRef<SpeechSynthesis | null>(null);
 
   useEffect(() => {
-    synth.current = window.speechSynthesis;
-    setIsSupported(true);
+    if ('speechSynthesis' in window) {
+      synth.current = window.speechSynthesis;
+      setIsSupported(true);
 
-    // Chrome loads voices asynchronously, so we need to wait for them
-    const loadVoices = () => {
-      window.speechSynthesis.getVoices();
-    };
+      // Chrome loads voices asynchronously, so we need to wait for them
+      const loadVoices = () => {
+        if (window.speechSynthesis) {
+          window.speechSynthesis.getVoices();
+        }
+      };
 
-    loadVoices();
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
+    } else {
+      console.warn("Text-to-Speech not supported in this environment");
+      setIsSupported(false);
     }
   }, []);
 

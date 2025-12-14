@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MemoryPanel from './components/MemoryPanel';
 import ChatInterface from './components/ChatInterface';
+import AdMobBanner from './components/AdMobBanner';
 import { Message, Memory, BackupData } from './types';
 import { extractFact, generateReply, transcribeAudio, generateWelcomeMessage, generateProactiveQuestion } from './services/geminiService';
 import { useTTS } from './hooks/useTTS';
@@ -267,7 +268,11 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-950 text-gray-100 overflow-hidden font-sans">
+    <div
+      className="flex h-screen w-screen bg-gray-950 text-gray-100 overflow-hidden font-sans flex-col fixed inset-0"
+      style={{ backgroundColor: '#0f172a', width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}
+    >
+
 
       {/* Mobile Backdrop */}
       {isSidebarOpen && (
@@ -316,6 +321,9 @@ export default function App() {
             </span>
           )}
         </div>
+
+        {/* AdMob Banner - Replaces space or sits at bottom */}
+        <AdMobBanner />
       </div>
     </div>
   );

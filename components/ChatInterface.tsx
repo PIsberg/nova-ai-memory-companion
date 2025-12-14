@@ -73,7 +73,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-gray-950 relative w-full">
+    <div className="flex-1 flex flex-col min-h-0 bg-gray-950 relative w-full">
       {/* Header with Avatar */}
       <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-gray-900 via-gray-900/80 to-transparent z-10 flex items-center px-4 md:px-6 pointer-events-none">
         <div className="flex items-center gap-3 md:gap-4 pointer-events-auto w-full">
