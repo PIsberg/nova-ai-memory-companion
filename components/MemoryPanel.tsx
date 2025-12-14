@@ -89,7 +89,9 @@ const MemoryPanel: React.FC<MemoryPanelProps> = ({
 
         {/* Memory List */}
         <div>
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Stored Facts</h3>
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            Stored Facts ({memories.length})
+          </h3>
 
           {memories.length === 0 ? (
             <div className="text-center py-10 opacity-40">

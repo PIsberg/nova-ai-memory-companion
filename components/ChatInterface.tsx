@@ -103,7 +103,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-base md:text-lg font-bold text-white leading-none truncate">Nova</h1>
-            <p className="text-[10px] md:text-xs text-gray-400 mt-1 flex items-center gap-1 truncate">
+            <p className="text-[10px] md:text-xs text-brand-300 mt-1 flex items-center gap-1 truncate font-medium">
               <span className="w-1 h-1 rounded-full bg-brand-500 flex-shrink-0"></span>
               Memory Active
             </p>
