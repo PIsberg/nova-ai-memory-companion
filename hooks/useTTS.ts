@@ -6,9 +6,17 @@ export const useTTS = () => {
   const synth = useRef<SpeechSynthesis | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      synth.current = window.speechSynthesis;
-      setIsSupported(true);
+    synth.current = window.speechSynthesis;
+    setIsSupported(true);
+
+    // Chrome loads voices asynchronously, so we need to wait for them
+    const loadVoices = () => {
+      window.speechSynthesis.getVoices();
+    };
+
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
     }
   }, []);
 
@@ -19,10 +27,41 @@ export const useTTS = () => {
     synth.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Optional: Select a specific voice if desired, or let browser default
-    // const voices = synth.current.getVoices();
-    // utterance.voice = voices.find(v => v.lang.includes('en')) || null;
+
+    // Voice Preference Logic
+    const voices = synth.current.getVoices();
+
+    // Priority list for "Natural" / "Female" voices
+    // 1. Google US English (often high quality on Chrome)
+    // 2. Microsoft Zira (Standard Windows Female)
+    // 3. Samantha (macOS Female)
+    // 4. Any "Female" voice
+    // 5. Any English voice
+
+    let selectedVoice = voices.find(v => v.name === "Google US English");
+
+    if (!selectedVoice) {
+      selectedVoice = voices.find(v => v.name.includes("Google") && v.lang.includes("en-US"));
+    }
+    if (!selectedVoice) {
+      selectedVoice = voices.find(v => v.name.includes("Zira")); // Windows
+    }
+    if (!selectedVoice) {
+      selectedVoice = voices.find(v => v.name.includes("Samantha")); // macOS
+    }
+    if (!selectedVoice) {
+      selectedVoice = voices.find(v => v.name.toLowerCase().includes("female") && v.lang.includes("en"));
+    }
+    if (!selectedVoice) {
+      selectedVoice = voices.find(v => v.lang === "en-US");
+    }
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      // Slightly lower pitch/rate can sometimes sound more natural for AI (subjective)
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+    }
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);

@@ -23,6 +23,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 }) => {
   const [inputText, setInputText] = React.useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Reverted: Remove auto-stop callback
   const { status, startRecording, stopRecording, permissionError } = useAudioRecorder();
 
   const scrollToBottom = () => {
@@ -32,6 +34,25 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  // Keyboard shortcut for Mic (Spacebar)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger if Space is pressed AND no input/active element is focused
+      if (e.code === 'Space') {
+        const activeTag = document.activeElement?.tagName.toLowerCase();
+        if (activeTag === 'input' || activeTag === 'textarea' || document.activeElement?.isContentEditable) {
+          return;
+        }
+
+        e.preventDefault(); // Prevent scrolling
+        handleMicClick();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [status, startRecording, stopRecording]); // Dependencies for handleMicClick logic
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -9,7 +9,7 @@ export const useAudioRecorder = () => {
 
   const startRecording = useCallback(async () => {
     setPermissionError(null);
-    
+
     // Check API support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setPermissionError("Audio recording is not supported in this browser environment.");
@@ -18,10 +18,25 @@ export const useAudioRecorder = () => {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      const mediaRecorder = new MediaRecorder(stream);
+
+      // Detect supported MIME type
+      const mimeTypes = [
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg',
+        'audio/wav',
+        'audio/aac'
+      ];
+
+      const supportedType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+      const options = supportedType ? { mimeType: supportedType } : undefined;
+
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
+
+      // Store the mime type for blob creation later
+      (mediaRecorder as any)._mimeType = supportedType || '';
 
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -52,13 +67,15 @@ export const useAudioRecorder = () => {
       }
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        // Use the mime type we selected, or fallback to something generic if browser defaulted
+        const mimeType = (mediaRecorder as any)._mimeType || 'audio/webm';
+        const blob = new Blob(chunksRef.current, { type: mimeType });
         chunksRef.current = [];
         setStatus(RecorderStatus.Idle);
-        
+
         // Important: Stop all tracks to release the microphone
         mediaRecorder.stream.getTracks().forEach(track => track.stop());
-        
+
         resolve(blob);
       };
 
