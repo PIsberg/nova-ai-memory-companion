@@ -2,10 +2,6 @@
 
 Nova is a React-based AI companion that **remembers you**. Unlike standard chatbots that reset every session, Nova uses a simulated Retrieval-Augmented Generation (RAG) system to store and recall facts about your life, preferences, and conversations.
 
-<div align="center">
-<img width="800" alt="Nova Interface" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 ## ✨ Key Features
 
 ### 🧠 Long-Term Memory
@@ -24,6 +20,12 @@ Nova is a React-based AI companion that **remembers you**. Unlike standard chatb
 ### 💾 Data Control
 - **Import/Export**: Your data belongs to you. Backup your entire "Brain" (memories + chat history) to a JSON file and restore it anytime.
 - **Local-First**: All memories are stored in your browser's LocalStorage (simulated vector DB) and processed via Gemini API.
+
+<img width="566" height="1271" alt="nova_Screenshot_20251214-104220" src="https://github.com/user-attachments/assets/bd7c2145-ebf5-4a25-823e-4ef3f5c0e178" />
+
+
+<img width="566" height="1271" alt="nova_Screenshot_20251214-104313" src="https://github.com/user-attachments/assets/6f40901e-dd3e-49d0-85ec-9ede67da73b2" />
+
 
 ## 🚀 Getting Started
 
